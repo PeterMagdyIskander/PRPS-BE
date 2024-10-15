@@ -1,184 +1,173 @@
-# Package Manager Service
+# User Management Module
 
-This service manages package information, including creating, and retrieving, package data.
+This Module manages user information, including creating, retrieving, updating, and deleting user data.
 
-## Endpoints of Packages Module
+## Endpoints
 
-### 1. Get Domains
+### 1. Get User Information
 
-- **Endpoint:** `GET pack/domains`
-- **Description:** Gets all the domains in the system
-- **Headers:**
-    - `Bearer <JWT token>` (string): The JWT token.
+- **Endpoint:** `GET users/:email`
+- **Description:** Retrieves information for a specific user based on their email.
 - **Request DTO:**
-  - no request DTO
+  - **Path Parameters:**
+    - `email` (string): The email address of the user.
 - **Response DTO:**
-  - `Domains` (Array): List of all the domains in the system.
+  - `id` (number): The unique identifier of the user.
+  - `email` (string): The user's email address.
+  - `password` (string): The user's password.
+  - Other fields related to user details (e.g., role, company, occupation).
 
 - **Example Response:**
   ```json
-  [{
+  {
     "id": 1,
-    "domain": "driving",
-  }]
+    "email": "user@example.com",
+    "password": "hashed_password",
+    "role": "EMPLOYEE"
+  }
 
-### 2. Get Servers
+### 2. Delete User Information
 
-- **Endpoint:** `GET pack/servers`
-- **Description:** Gets all the servers in the system
-- **Headers:**
-    - `Bearer <JWT token>` (string): The JWT token.
+- **Endpoint:** `DELETE users/:email`
+- **Description:** Removes information for a specific user based on their email.
 - **Request DTO:**
-  - no request DTO
+  - **Path Parameters:**
+    - `email` (string): The email address of the user.
 - **Response DTO:**
-  - `Servers` (Array): List of all the servers in the system.
+  - `message` (string): Whether the user was deleted or not.
 
 - **Example Response:**
   ```json
-  [{
+  {
+    "message": "User deleted successfuly",
+  }
+
+### 3. Create User Information
+
+- **Endpoint:** `POST users/signup`
+- **Description:** Add a new user to the system
+- **Request DTO:**
+  - `firstName` (string): First name of the user.
+  - `lastName` (string): Last name of the user.
+  - `email` (string): The email address of the user.
+  - `company` (string): Where does the user work.
+  - `occupation` (string): What does the user work.
+- **Response DTO:**
+  - `message` (string): Whether the user was added or not.
+
+- **Example Response:**
+  ```json
+  {
+    "message": "User info has been saved",
+  }
+
+### 4. Update User Password
+
+- **Endpoint:** `POST users/updatePassword`
+- **Description:** Update user password
+- **Request DTO:**
+  - `email` (string): The email address of the user.
+  - `password` (string): New Password of the user.
+- **Response DTO:**
+  - `message` (string): Whether the password was updated or not.
+
+- **Example Response:**
+  ```json
+  {
+    "message": "Password updated successfully",
+  }
+
+
+# Authenticator Module
+
+This Module manages the authentication of users.
+
+## Endpoints
+
+### 1. Login
+
+- **Endpoint:** `POST auth/login`
+- **Description:** Logs in the user on the system by creating a JWT token for the user
+- **Request DTO:**
+  - `email` (string): The email address of the user.
+  - `password` (string): The password of the user.
+- **Response DTO:**
+  - `id` (number): The unique identifier of the user.
+  - `token` (string): JWT toke.
+  - `role` (string): Role of the user.
+  - `message` (string): Status message.
+
+- **Example Response:**
+  ```json
+  {
     "id": 1,
-    "server": "NXP",
-  }]
+    "token": "mdsofmois-fsd",
+    "role": "EMPLOYEE",
+    "message": "success",
+  }
 
-### 3. Get Packages
+### 2. Verify JWT
 
-- **Endpoint:** `GET pack/packages?server=server&domain=domain&userCredentialsId=userCredentialId`
-- **Description:** Gets all the packages in the system
+- **Endpoint:** `POST auth/verify`
+- **Description:** Verifies that the provided JWT is a valid one.
 - **Headers:**
     - `Bearer <JWT token>` (string): The JWT token.
-- **Request DTO:**
-  - **Query Parameters:**
-    - `userCredentialId` (number): The id of the logged in user.
-    - `server` (string): Selected Server.
-    - `domain` (string): Selected Domain.
 - **Response DTO:**
-  - `Packages` (Array): List of all the packages in the system.
-
-- **Example Response:**
-  ```json
-  [
-    {
-        "packageId": 1,
-        "packageName": "package1",
-        "swVariants": [
-            {
-                "id": 1,
-                "type": "SOURCE",
-                "level": "ADVANCE",
-                "price": 120,
-                "accessLink": "access_link_1",
-                "linkToMainImage": "image_link_1",
-                "variantFeatures": [
-                    {
-                        "id": 1,
-                        "feature": "feature_1"
-                    }
-                ],
-                "variantSpecDocs": [
-                    {
-                        "type": "pdf",
-                        "docId": 1,
-                        "documentName": "asd"
-                    }
-                ],
-                "subscriptionStatus": "SUBSCRIBED"
-            }
-        ]
-    },
-    {
-        "packageId": 2,
-        "packageName": "package2",
-        "swVariants": [
-            {
-                "id": 2,
-                "type": "SOURCE",
-                "level": "ADVANCE",
-                "price": 120,
-                "accessLink": "access_link_1",
-                "linkToMainImage": "image_link_1",
-                "variantFeatures": [
-                    {
-                        "id": null,
-                        "feature": null
-                    }
-                ],
-                "variantSpecDocs": [
-                    {
-                        "type": null,
-                        "docId": null,
-                        "documentName": null
-                    }
-                ],
-                "subscriptionStatus": "UNSUBSCRIBED"
-            }
-        ]
-    }
-  ]
-
-### 4. Download Package
-
-- **Endpoint:** `GET pack/download/:id`
-- **Description:** Download package
-- **Headers:**
-    - `Bearer <JWT token>` (string): The JWT token.
-- **Request DTO:**
-  - **Path Parameters:**
-    - `id` (number): The id of the package (accessLink).
-- **Response DTO:**
-  - No response DTO
-
-## Endpoints of Subscriptions Module
-
-### 1. Add Subscription
-
-- **Endpoint:** `POST subscriptions/`
-- **Description:** Add a subscription record
-- **Headers:**
-    - `Bearer <JWT token>` (string): The JWT token.
-- **Request DTO:**
-  - `userId` (number): Id of the user.
-  - `variantId` (number): Id of the variant the user wishes to subscribe to.
-- **Response DTO:**
-  - `message` (string): message whether the subscription was added successfuly or not.
+  - `message` (string): Whether the JWT token was valid or not.
 
 - **Example Response:**
   ```json
   {
-    "message": "Subscription added successfuly, and status is pending approval",
+    "message": "success",
   }
 
-### 2. Approve Subscription
+### 3. Create User Information
 
-- **Endpoint:** `PUT subscriptions/approve/:id`
-- **Description:** Approve Subscription of a user.
-- **Headers:**
-    - `Bearer <JWT token>` (string): The JWT token.
+- **Endpoint:** `POST auth/signup`
+- **Description:** Add a new user to the system
 - **Request DTO:**
-  - **Path Parameters:**
-    - `id` (number): Id of the subscription.
+  - `firstName` (string): First name of the user.
+  - `lastName` (string): Last name of the user.
+  - `email` (string): The email address of the user.
+  - `company` (string): Where does the user work.
+  - `occupation` (string): What does the user work.
 - **Response DTO:**
-  - `message` (string): message whether the subscription was approved successfuly.
+  - `message` (string): Whether the user was added or not.
 
 - **Example Response:**
   ```json
   {
-    "message": "Subscription approved successfuly",
+    "message": "User info has been saved and sent to another service.",
   }
 
-### 3. Reject Subscription
+### 4. Update User Password
 
-- **Endpoint:** `PUT subscriptions/reject/:id`
-- **Description:** Reject Subscription of a user.
-- **Headers:**
-    - `Bearer <JWT token>` (string): The JWT token.
+- **Endpoint:** `POST auth/updatePassword`
+- **Description:** Update user password
 - **Request DTO:**
-  - **Path Parameters:**
-    - `id` (number): Id of the subscription.
+  - `email` (string): The email address of the user.
+  - `password` (string): New Password of the user.
 - **Response DTO:**
-  - `message` (string): message whether the subscription was rejected successfuly.
+  - `message` (string): Whether the password was updated or not.
 
 - **Example Response:**
   ```json
   {
-    "message": "Subscription removed successfuly",
+    "message": "Password has been updated successfully",
   }
+
+### 4. Forgot User Password
+
+- **Endpoint:** `POST auth/forgotPassword`
+- **Description:** Send an email to the provided email address
+- **Request DTO:**
+  - `email` (string): The email address of the user.
+- **Response DTO:**
+  - `message` (string): Whether the password was updated or not.
+
+- **Example Response:**
+  ```json
+  {
+    "message": "Email sent",
+  }
+
