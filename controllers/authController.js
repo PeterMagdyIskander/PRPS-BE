@@ -3,7 +3,7 @@ require("dotenv").config();
 const nodemailer = require("nodemailer");
 const axios = require("axios");
 const FRONTEND_URL = process.env.FRONTEND_URL;
-
+const appDataSource = require("../dataSource");
 let handleForgetPasswordForTestingMessage;
 
 const transporter = nodemailer.createTransport({

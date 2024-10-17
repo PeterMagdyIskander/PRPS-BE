@@ -1,9 +1,9 @@
 version: '3.8'
 
 services:
-  database:
+  prps_database:
     image: postgres:13
-    container_name: my_database
+    container_name: prps_db
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -12,6 +12,8 @@ services:
       - prps_db:/var/lib/postgresql/data
     networks:
       - prps_network
+    ports:
+      - "5432:5432"
 
   prps_be:
     build: .
@@ -21,7 +23,7 @@ services:
     networks:
       - prps_network
     depends_on:
-      - database
+      - prps_database
     ports:
       - "3000:${PORT}"  # Map internal container port to host port 3004
 

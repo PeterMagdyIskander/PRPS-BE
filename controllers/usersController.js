@@ -1,4 +1,5 @@
-const { getRepository } = require("typeorm");
+
+const appDataSource = require("../dataSource");
 const User = require("../entity/user_credentials"); // Adjust the path as necessary
 const UserInfo = require("../entity/user_info");
 var generator = require("generate-password");
@@ -8,7 +9,7 @@ const getUser = async (req, res) => {
   const email = req.params.email;
   if (!email) return res.status(400).json({ message: "Email is required." });
 
-  const userRepository = getRepository(User);
+  const userRepository = appDataSource.getRepository(User);
   const user = await userRepository.findOne({
     where: { email },
   });
@@ -25,14 +26,14 @@ const deleteUser = async (req, res) => {
   const email = req.params.email;
   if (!email) return res.status(400).json({ message: "Email is required." });
 
-  const userRepository = getRepository(User);
+  const userRepository = appDataSource.getRepository(User);
   const user = await userRepository.findOne({
     where: { email },
   });
   if (!user) {
     return res.status(404).json({ message: "User not found" });
   }
-  const userInfoRepository = getRepository(UserInfo);
+  const userInfoRepository = appDataSource.getRepository(UserInfo);
   const userInfo = await userInfoRepository.findOne({
     where: { userCredentialsId: user.id },
   });
@@ -43,8 +44,8 @@ const deleteUser = async (req, res) => {
 
 const createAccount = async (req, res) => {
   const { company, occupation, firstName, lastName, email } = req.body;
-  const userCredentialsRepository = getRepository(User);
-  const userInfoRepository = getRepository(UserInfo);
+  const userCredentialsRepository = appDataSource.getRepository(User);
+  const userInfoRepository = appDataSource.getRepository(UserInfo);
 
   try {
     // Create new user credentials
@@ -86,7 +87,7 @@ const handleUpdatePassword = async (req, res) => {
         .status(404)
         .json({ message: "email and password are required" });
     }
-    const userRepository = getRepository(User);
+    const userRepository = appDataSource.getRepository(User);
     // Create new user credentials
     const user = await userRepository.findOne({ where: { email: email } });
 
@@ -117,8 +118,8 @@ const handleUpdateEmail = async (req, res) => {
       return res.status(404).json({ message: "email and newEmail are required" });
     }
 
-    const userRepository = getRepository(User);
-    const userInfoRepository = getRepository(UserInfo); // Get UserInfo repository
+    const userRepository = appDataSource.getRepository(User);
+    const userInfoRepository = appDataSource.getRepository(UserInfo); // Get UserInfo repository
 
     // Find the user based on email
     const user = await userRepository.findOne({ where: { email: email } });
@@ -162,8 +163,8 @@ const handleUpdateName = async (req, res) => {
       return res.status(404).json({ message: "email, firstName and lastName are required" });
     }
 
-    const userRepository = getRepository(User);
-    const userInfoRepository = getRepository(UserInfo); // Get UserInfo repository
+    const userRepository = appDataSource.getRepository(User);
+    const userInfoRepository = appDataSource.getRepository(UserInfo); // Get UserInfo repository
 
     // Find the user based on email
     const user = await userRepository.findOne({ where: { email: email } });
@@ -211,8 +212,8 @@ const handleUpdateProfileData = async (req, res) => {
   }
 
   try {
-    const userRepository = getRepository(User);
-    const userInfoRepository = getRepository(UserInfo); // Get UserInfo repository
+    const userRepository = appDataSource.getRepository(User);
+    const userInfoRepository = appDataSource.getRepository(UserInfo); // Get UserInfo repository
 
     const user = await userRepository.findOne({ where: { email: email } });
 
@@ -274,8 +275,8 @@ const handleUpdateProfileData = async (req, res) => {
 
 const getUserInfo = async (req, res) => {
   const email = req.params.email;
-  const userInfoRepository = getRepository(UserInfo);
-  const userCredentialsRepository = getRepository(User);
+  const userInfoRepository = appDataSource.getRepository(UserInfo);
+  const userCredentialsRepository = appDataSource.getRepository(User);
 
   try {
     // Retrieve user credentials based on email

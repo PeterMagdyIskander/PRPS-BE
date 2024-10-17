@@ -28,4 +28,10 @@ const main = async () => {
   }
 };
 
+process.on('SIGINT', async () => {
+  await appDataSource.destroy();
+  console.log("Database connection closed due to app termination");
+  process.exit(0);
+});
+
 main();
