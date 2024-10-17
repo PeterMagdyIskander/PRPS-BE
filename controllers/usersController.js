@@ -1,7 +1,7 @@
 
 const appDataSource = require("../dataSource");
-const User = require("../entity/user_credentials"); // Adjust the path as necessary
-const UserInfo = require("../entity/user_info");
+const userCredentials = require("../entity/user_credentials");
+const userInfo = require("../entity/user_info");
 var generator = require("generate-password");
 const fs = require("fs");
 
@@ -9,8 +9,8 @@ const getUser = async (req, res) => {
   const email = req.params.email;
   if (!email) return res.status(400).json({ message: "Email is required." });
 
-  const userRepository = appDataSource.getRepository(User);
-  const user = await userRepository.findOne({
+  const userCredentialsRepository = appDataSource.getRepository(userCredentials);
+  const user = await userCredentialsRepository.findOne({
     where: { email },
   });
 
@@ -26,26 +26,26 @@ const deleteUser = async (req, res) => {
   const email = req.params.email;
   if (!email) return res.status(400).json({ message: "Email is required." });
 
-  const userRepository = appDataSource.getRepository(User);
-  const user = await userRepository.findOne({
+  const userCredentialsRepository = appDataSource.getRepository(userCredentials);
+  const userCredentialsObject = await userCredentialsRepository.findOne({
     where: { email },
   });
-  if (!user) {
+  if (!userCredentialsObject) {
     return res.status(404).json({ message: "User not found" });
   }
-  const userInfoRepository = appDataSource.getRepository(UserInfo);
-  const userInfo = await userInfoRepository.findOne({
+  const userInfoRepository = appDataSource.getRepository(userInfo);
+  const userInfoObject = await userInfoRepository.findOne({
     where: { userCredentialsId: user.id },
   });
-  await userInfoRepository.remove(userInfo);
-  await userRepository.remove(user);
+  await userInfoRepository.remove(userInfoObject);
+  await userCredentialsRepository.remove(user);
   return res.status(200).json({ message: "User deleted successfuly" });
 };
 
 const createAccount = async (req, res) => {
   const { company, occupation, firstName, lastName, email } = req.body;
-  const userCredentialsRepository = appDataSource.getRepository(User);
-  const userInfoRepository = appDataSource.getRepository(UserInfo);
+  const userCredentialsRepository = appDataSource.getRepository(userCredentials);
+  const userInfoRepository = appDataSource.getRepository(userInfo);
 
   try {
     // Create new user credentials
@@ -72,7 +72,7 @@ const createAccount = async (req, res) => {
     });
     await userInfoRepository.save(userInfo);
 
-    res.status(201).json({ message: "Account Manager Created" });
+    res.status(201).json({ message: "Account Created" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error saving user info." });
@@ -87,9 +87,9 @@ const handleUpdatePassword = async (req, res) => {
         .status(404)
         .json({ message: "email and password are required" });
     }
-    const userRepository = appDataSource.getRepository(User);
+    const userCredentialsRepository = appDataSource.getRepository(userCredentials);
     // Create new user credentials
-    const user = await userRepository.findOne({ where: { email: email } });
+    const user = await userCredentialsRepository.findOne({ where: { email: email } });
 
     if (user) {
       if (password === user.password) {
@@ -97,7 +97,7 @@ const handleUpdatePassword = async (req, res) => {
       }
 
       user.password = password;
-      await userRepository.save(user);
+      await userCredentialsRepository.save(user);
 
       return res.status(200).json({ message: "Password updated successfully" });
     } else {
@@ -109,7 +109,6 @@ const handleUpdatePassword = async (req, res) => {
   }
 };
 
-// To be removed
 const handleUpdateEmail = async (req, res) => {
   const { email, newEmail } = req.body;
   try {
@@ -118,14 +117,14 @@ const handleUpdateEmail = async (req, res) => {
       return res.status(404).json({ message: "email and newEmail are required" });
     }
 
-    const userRepository = appDataSource.getRepository(User);
-    const userInfoRepository = appDataSource.getRepository(UserInfo); // Get UserInfo repository
+    const userCredentialsRepository = appDataSource.getRepository(userCredentials);
+    const userInfoRepository = appDataSource.getRepository(userInfo); // Get UserInfo repository
 
     // Find the user based on email
-    const user = await userRepository.findOne({ where: { email: email } });
+    const user = await userCredentialsRepository.findOne({ where: { email: email } });
 
     // make sure that the new email doesn't exist
-    const newEmailUser = await userRepository.findOne({ where: { email: newEmail } });
+    const newEmailUser = await userCredentialsRepository.findOne({ where: { email: newEmail } });
     if (newEmailUser) {
       return res.status(404).json({ message: "New email already exists" });
     }
@@ -139,7 +138,7 @@ const handleUpdateEmail = async (req, res) => {
       if (userInfo) {
         // Update email in userCredentials
         user.email = newEmail;
-        await userRepository.save(user);
+        await userCredentialsRepository.save(user);
 
         res.status(200).json({ message: "Email updated successfully" });
       } else {
@@ -163,11 +162,11 @@ const handleUpdateName = async (req, res) => {
       return res.status(404).json({ message: "email, firstName and lastName are required" });
     }
 
-    const userRepository = appDataSource.getRepository(User);
-    const userInfoRepository = appDataSource.getRepository(UserInfo); // Get UserInfo repository
+    const userCredentialsRepository = appDataSource.getRepository(userCredentials);
+    const userInfoRepository = appDataSource.getRepository(userInfo); // Get UserInfo repository
 
     // Find the user based on email
-    const user = await userRepository.findOne({ where: { email: email } });
+    const user = await userCredentialsRepository.findOne({ where: { email: email } });
 
     if (user) {
       // Find the associated userInfo
@@ -212,10 +211,10 @@ const handleUpdateProfileData = async (req, res) => {
   }
 
   try {
-    const userRepository = appDataSource.getRepository(User);
-    const userInfoRepository = appDataSource.getRepository(UserInfo); // Get UserInfo repository
+    const userCredentialsRepository = appDataSource.getRepository(userCredentials);
+    const userInfoRepository = appDataSource.getRepository(userInfo); // Get UserInfo repository
 
-    const user = await userRepository.findOne({ where: { email: email } });
+    const user = await userCredentialsRepository.findOne({ where: { email: email } });
 
     if (user) {
       console.log("user", user);
@@ -275,8 +274,8 @@ const handleUpdateProfileData = async (req, res) => {
 
 const getUserInfo = async (req, res) => {
   const email = req.params.email;
-  const userInfoRepository = appDataSource.getRepository(UserInfo);
-  const userCredentialsRepository = appDataSource.getRepository(User);
+  const userInfoRepository = appDataSource.getRepository(userInfo);
+  const userCredentialsRepository = appDataSource.getRepository(userCredentials);
 
   try {
     // Retrieve user credentials based on email
@@ -287,39 +286,6 @@ const getUserInfo = async (req, res) => {
     if (!userCredentials) {
       return res.status(404).json({ message: "User not found" });
     }
-
-    //userCredentials.id
-
-
-
-/*
-
-const downloadPackage = async (req, res) => {
-  //we need userId and variantId to check if user is subscribed
-  const filename = req.params.id;
-    // Define the path to the file in the files folder
-    const filePath = path.join(__dirname, '../files', `${filename}.7z`);
-
-    // Check if the file exists
-    fs.access(filePath, fs.constants.F_OK, (err) => {
-        if (err) {
-            // If file doesn't exist, return 404 with a message
-            return res.status(404).json({ message: 'File not found' });
-        }
-
-        // If file exists, return 200 and download the file
-        res.status(200).download(filePath, filename, (downloadErr) => {
-            if (downloadErr) {
-                // Handle any errors during file download
-                return res.status(500).json({ message: 'Error in downloading file' });
-            }
-        });
-    }); 
-};
-
-*/
-
-
 
     // Retrieve user info using the userCredentialsId from the previous query
     const userInfo = await userInfoRepository.findOne({

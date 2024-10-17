@@ -4,7 +4,7 @@ const nodemailer = require("nodemailer");
 const axios = require("axios");
 const FRONTEND_URL = process.env.FRONTEND_URL;
 const appDataSource = require("../dataSource");
-let handleForgetPasswordForTestingMessage;
+const userCredentials = require("../entity/user_credentials");
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -21,49 +21,36 @@ const handleLogin = async (req, res) => {
       .status(400)
       .json({ message: "Email and Password are required." });
 
-  try {
-    const response = await axios.get(`${process.env.ACCOUNT_MANAGER_URL}/users/${email}`);
-    const userData = response.data;
-    if (!userData) return res.sendStatus(401);
+    const userRepository = appDataSource.getRepository(userCredentials);
+    const user = await userRepository.findOne({
+      where: { email },
+    });
 
-    // const match = await bcrypt.compare(password, foundUser.password);
+    if (!user)
+      return res
+        .status(400)
+        .json({ message: `Employee Id ${req.params.email} not found` });
 
-    if (userData.password === password) {
+    if (user.password === password) {
       const accessToken = jwt.sign(
         {
-          email: userData.email,
-          role: userData.role,
+          email: user.email,
+          role: user.role,
         },
         process.env.ACCESS_TOKEN_SECRET,
         { expiresIn: "1hr" }
       );
       res.status(200).json({
-        role: userData.role,
+        role: user.role,
         token: accessToken,
         message: "success",
-        id:userData.id
+        id: user.id
       });
     } else {
       return res.status(401).json({ message: "Password is incorrect." });
     }
-  } catch (error) {
-    console.error("Error fetching user data:", error.message);
-    res
-      .status(401)
-      .json({ error: "Email is either incorrect or does not exist" });
   }
-};
 
-const handleVerify = async (req, res) => {
-  const authHeader = req.headers["authorization"];
-  if (!authHeader) return res.status(401).json({ message: "unauthorized" });
-  const token = authHeader.split(" ")[1];
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-    if (err) return res.status(403).json({ message: "unauthorized" });
-    req.user = decoded.email;
-    res.status(200).json({ message: "success" });
-  });
-};
 
 const handleSignup = async (req, res) => {
   const { company, occupation, firstName, lastName, email } = req.body;
@@ -151,17 +138,6 @@ const handleUpdatePassword = async (req, res) => {
   }
 };
 
-const handleForgetPasswordForTesting = async (req, res) => {
-  await handleForgetPassword(req, res);
-  console.log(handleForgetPasswordForTestingMessage);
-  try {
-    return res
-      .status(200)
-      .json({ message: handleForgetPasswordForTestingMessage });
-  } catch (err) {
-    console.log(err);
-  }
-};
 
 const handleForgetPassword = async (req, res) => {
   const { email } = req.body;
@@ -225,6 +201,7 @@ function isOnlyLetters(str) {
   const onlyLettersRegex = /^[A-Za-z]+$/;
   return onlyLettersRegex.test(str);
 }
+
 function validatePassword(password) {
   const minLength = 12;
   const maxLength = 100;
@@ -291,10 +268,8 @@ function validatePassword(password) {
 
 module.exports = {
   handleLogin,
-  handleVerify,
   handleSignup,
   handleUpdatePassword,
   handleForgetPassword,
   handleResetPassword,
-  handleForgetPasswordForTesting,
 };
