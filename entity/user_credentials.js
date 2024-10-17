@@ -16,6 +16,9 @@ module.exports = new EntitySchema({
     password: {
       type: "varchar",
     },
+    approved: {
+      type: "varchar",
+    },
     role: {
       type: "varchar",
     },

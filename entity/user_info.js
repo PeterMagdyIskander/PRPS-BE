@@ -15,18 +15,43 @@ module.exports = new EntitySchema({
     lastName: {
       type: "varchar"
     },
-    company: {
+    phoneNumber: {
       type: "varchar"
     },
-    occupation: {
-      type: "varchar"
+    gender: {
+      type: "varchar",
+      enum: ["male", "female"]
     },
-    approved: {
-      type: "boolean"
+    track: {
+      type: "varchar",
     },
-    userCredentialsId: {
-      type: "int"
-    }
+    city: {
+      type: "varchar",
+    },
+    street: {
+      type: "varchar",
+    },
+    dob: {
+      type: "varchar",
+    },
+    educationLevel: {
+      type: "varchar",
+    },
+    schoolName: {
+      type: "varchar",
+    },
+    major: {
+      type: "varchar",
+    },
+    graduationYear: {
+      type: "varchar",
+    },
+    nationalId: {
+      type: "varchar",
+    },
+    signature: {
+      type: "boolean",
+    },
   },
   relations: {
     userCredentials: {
