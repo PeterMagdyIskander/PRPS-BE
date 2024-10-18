@@ -1,11 +1,11 @@
 import { appDataSource } from "../dataSource.js";
-import userCredentials from "../entity/user_credentials.js";
+import user_credentials from "../entity/user_credentials.js";
 import { deleteUserById, createAccountInfo, getAllUserDataByUserCredentialsId } from './userInfo.js';
 
 
 // Get user by email
 const getUserByEmail = async (email) => {
-    const userCredentialsRepository = appDataSource.getRepository(userCredentials);
+    const userCredentialsRepository = appDataSource.getRepository(user_credentials);
     const user = await userCredentialsRepository.findOne({
         where: { email },
     });
@@ -22,7 +22,7 @@ const getAllUserDataByEmail = async (email) => {
 
 // Delete user by email
 const deleteUserByEmail = async (email) => {
-    const userCredentialsRepository = appDataSource.getRepository(userCredentials); // Declare repository
+    const userCredentialsRepository = appDataSource.getRepository(user_credentials); // Declare repository
     const user = await getUserByEmail(email);
     if (!user) return "User is not found.";
     await deleteUserById(user.id);
@@ -32,11 +32,12 @@ const deleteUserByEmail = async (email) => {
 
 // Create a new account
 const createAccount = async (email, password, userObject) => {
-    const userCredentialsRepository = appDataSource.getRepository(userCredentials); // Declare repository
+    const userCredentialsRepository = appDataSource.getRepository(user_credentials); // Declare repository
     const userCredentials = userCredentialsRepository.create({
         email,
         password,
         role: "account",
+        approved:false
     });
     try {
         await userCredentialsRepository.save(userCredentials);
@@ -54,7 +55,7 @@ const createAccount = async (email, password, userObject) => {
 
 // Update password
 const updatePassword = async (email, password) => {
-    const userCredentialsRepository = appDataSource.getRepository(userCredentials); // Declare repository
+    const userCredentialsRepository = appDataSource.getRepository(user_credentials); // Declare repository
     const user = await getUserByEmail(email);
     if (!user) return "User is not found.";
     user.password = password;

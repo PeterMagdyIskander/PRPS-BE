@@ -23,7 +23,7 @@ const handleSignup=async(req,res)=>{
       .json({ message: "Please submit all mandatory data." });
     const accountCreatedSuccessfully=await createAccount(email,password,userObject);
     if(accountCreatedSuccessfully)
-      res.status(201).json({
+      return res.status(201).json({
         message:"Account created Successfully."
       });
       

@@ -1,4 +1,4 @@
-import sign  from "jsonwebtoken";
+import jwt  from "jsonwebtoken";
 import dotenv from 'dotenv';
 dotenv.config();
 // import  createTransport from "nodemailer";
@@ -13,14 +13,13 @@ const handleLogin = async (req, res) => {
       .json({ message: "Email and password are required." });
 
   const user = await getAllUserDataByEmail(email);
-
   if (!user)
     return res
       .status(404)
       .json({ message: `Email does not exist` });
 
   if (user.userCredentials.password === password) {
-    const accessToken = sign(
+    const accessToken = jwt.sign(
       {
         email: user.email,
         role: user.role,

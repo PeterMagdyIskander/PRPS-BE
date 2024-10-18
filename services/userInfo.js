@@ -1,8 +1,8 @@
 import { appDataSource } from "../dataSource.js"
-import userInfo from "../entity/user_info.js";
+import user_info from "../entity/user_info.js";
 
 const deleteUserById = async (id) => {
-    const userInfoRepository = appDataSource.getRepository(userInfo);
+    const userInfoRepository = appDataSource.getRepository(user_info);
     const userInfoObject = await userInfoRepository.findOne({
         where: { userCredentialsId: id },
     });
@@ -10,7 +10,7 @@ const deleteUserById = async (id) => {
 }
 
 const createAccountInfo = async (userCredentials, userObject) => {
-    const userInfoRepository = getRepository(userInfo);
+    const userInfoRepository = appDataSource.getRepository(user_info);
     const userInfo = userInfoRepository.create({
         firstName: userObject.firstName,
         lastName: userObject.lastName,
@@ -36,7 +36,7 @@ const createAccountInfo = async (userCredentials, userObject) => {
     }
 }
 const getAllUserDataByUserCredentialsId = async (userCredentialsId) => {
-    const userInfoRepository = appDataSource.getRepository(userInfo);
+    const userInfoRepository = appDataSource.getRepository(user_info);
     const userInfo = await userInfoRepository.findOne({
         where: { userCredentialsId },
         relations: ["userCredentials"],

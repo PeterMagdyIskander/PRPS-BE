@@ -6,7 +6,7 @@ dotenv.config();
 // JWT validation middleware
 const jwtValidationMiddleware = (req, res, next) => {
   // Skip validation for the auth service route
-  if (req.originalUrl.includes('/users')) {
+  if (req.originalUrl.includes('/users')||req.originalUrl.includes('/auth')) {
     return next();
   }
 

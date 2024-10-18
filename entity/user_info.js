@@ -52,6 +52,9 @@ export default new EntitySchema({
     signature: {
       type: "boolean",
     },
+    userCredentialsId: {
+      type: "int"
+    }
   },
   relations: {
     userCredentials: {

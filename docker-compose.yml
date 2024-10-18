@@ -15,17 +15,17 @@ services:
     ports:
       - "5432:5432"
 
-  prps_be:
-    build: .
-    container_name: prps_be
-    environment:
-      - PORT=${PORT}
-    networks:
-      - prps_network
-    depends_on:
-      - prps_database
-    ports:
-      - "3000:${PORT}"  # Map internal container port to host port 3004
+  # prps_be:
+  #   build: .
+  #   container_name: prps_be
+  #   environment:
+  #     - PORT=${PORT}
+  #   networks:
+  #     - prps_network
+  #   depends_on:
+  #     - prps_database
+  #   ports:
+  #     - "3000:${PORT}"  # Map internal container port to host port 3004
 
 volumes:
   prps_db:
