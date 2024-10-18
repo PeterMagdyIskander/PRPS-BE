@@ -9,8 +9,26 @@ const deleteUserById = async (id) => {
     await userInfoRepository.remove(userInfoObject);
 }
 
-const createAccountInfo=()=>{
-    
+const createAccountInfo = async (userCredentials) => {
+    const userInfoRepository = appDataSource.getRepository(userInfo);
+    const userInfo = userInfoRepository.create({
+        firstName,
+        lastName,
+        phoneNumber,
+        gender,
+        track,
+        city,
+        street,
+        dob,
+        educationLevel,
+        schoolName,
+        major,
+        graduationYear,
+        nationalId,
+        signature,
+        userCredentials,
+    });
+    await userInfoRepository.save(userInfo);
 }
 
 module.exports = {
