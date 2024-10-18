@@ -1,8 +1,14 @@
-require("dotenv").config();
+import dotenv from 'dotenv';
+dotenv.config();
 
 const PORT = process.env.PORT;
 
-const whiteList = [`http://localhost:${PORT}`,`http://localhost:3002`,`http://localhost:3003`,`http://localhost:3000`];
+const whiteList = [
+  `http://localhost:${PORT}`,
+  'http://localhost:3002',
+  'http://localhost:3003',
+  'http://localhost:3000',
+];
 
 const corsOptions = {
   origin: (origin, callback) => {
@@ -15,4 +21,4 @@ const corsOptions = {
   optionsSuccessStatus: 200,
 };
 
-module.exports = corsOptions;
+export default corsOptions;

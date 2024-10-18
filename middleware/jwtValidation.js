@@ -1,6 +1,7 @@
 
-const jwt = require("jsonwebtoken");
-require("dotenv").config();
+import verify  from "jsonwebtoken";
+import dotenv from 'dotenv';
+dotenv.config();
 
 // JWT validation middleware
 const jwtValidationMiddleware = (req, res, next) => {
@@ -16,11 +17,11 @@ const jwtValidationMiddleware = (req, res, next) => {
   }
 
   const token = authHeader.split(' ')[1];
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+  verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
     if (err) return res.status(403).json({ message: 'Forbidden: Invalid token'});
     req.user = decoded.email;
     next();
   });
 };
 
-module.exports = jwtValidationMiddleware;
+export default jwtValidationMiddleware;

@@ -1,5 +1,5 @@
 // Load environment variables from config.js
-require('./config');
+import './config.js';
 
 // Start the server
-require('./server');
+import './server.js';

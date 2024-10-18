@@ -1,19 +1,20 @@
-const express = require("express");
+import express, { urlencoded, json } from "express";
 const app = express();
-const cors = require("cors");
-const corsOptions = require("./config/corsOptions");
-const appDataSource = require("./dataSource");
-const jwtValidationMiddleware = require("./middleware/jwtValidation");
-
+import cors from "cors";
+import corsOptions from "./config/corsOptions.js";
+import { appDataSource } from "./dataSource.js";
+import jwtValidationMiddleware from "./middleware/jwtValidation.js";
+import authRoutes from "./routes/api/authRoutes.js"
+import userRoutes from "./routes/api/userRoutes.js"
 const PORT = process.env.PORT;
 // app.use(cors(corsOptions));
 
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
+app.use(urlencoded({ extended: false }));
+app.use(json());
 app.use(jwtValidationMiddleware);
 
-app.use("/users", require("./routes/api/users"));
-app.use('/auth',require('./routes/api/auth'))
+app.use("/users", userRoutes);
+app.use('/auth', authRoutes)
 
 
 const main = async () => {
@@ -28,10 +29,10 @@ const main = async () => {
   }
 };
 
+main();
 process.on('SIGINT', async () => {
   await appDataSource.destroy();
   console.log("Database connection closed due to app termination");
   process.exit(0);
 });
 
-main();

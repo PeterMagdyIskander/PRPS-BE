@@ -1,9 +1,10 @@
-const { DataSource } = require("typeorm");
-const userCredentials = require("./entity/user_credentials");
-const userInfo = require("./entity/user_info");
-require("dotenv").config();
+import { DataSource } from 'typeorm';
+import user_credentials from './entity/user_credentials.js';
+import user_info from './entity/user_info.js';
+import dotenv from 'dotenv';
+dotenv.config();
 
-const appDataSource = new DataSource({
+export const appDataSource = new DataSource({
   type: process.env.DB_TYPE,
   host: process.env.DB_HOST,
   port: parseInt(process.env.DB_PORT, 10),
@@ -11,10 +12,10 @@ const appDataSource = new DataSource({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   entities: [
-    userCredentials,
-    userInfo
+    user_credentials,
+    user_info
   ],
   synchronize: true,
 });
 
-module.exports = appDataSource;
+ 
