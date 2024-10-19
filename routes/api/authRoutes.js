@@ -1,16 +1,10 @@
 import { Router } from "express";
 const router = Router();
-import { handleLogin } from "../../controllers/authController.js";
+import { handleLogin, handleForgotPassword, handleUpdatePassword, handleSignup } from "../../controllers/authController.js";
 
+router.post("/signup", handleSignup);
 router.post("/login", handleLogin);
-// router.post("/verify", handleVerify);
-// router.post("/signup", handleSignup);
-// router.post("/updatePassword", handleUpdatePassword);
-// router.post("/forgotPassword", handleForgetPassword);
-// router.post(
-//   "/forgotPasswordForTesting",
-//   handleForgetPasswordForTesting
-// );
-// router.post("/resetPassword", handleResetPassword);
+router.post("/updatePassword", handleUpdatePassword);
+router.post("/forgotPassword", handleForgotPassword);
 
 export default router;

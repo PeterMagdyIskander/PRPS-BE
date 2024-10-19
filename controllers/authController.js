@@ -1,10 +1,47 @@
-import jwt  from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import dotenv from 'dotenv';
 dotenv.config();
-// import  createTransport from "nodemailer";
+import { createTransport } from "nodemailer";
 import { getAllUserDataByEmail } from '../services/authService.js'
+import { updatePassword, createAccount } from '../services/authService.js'
+const transporter = createTransport({
+  service: "gmail",
+  auth: {
+    user: "pepomagdy999@gmail.com",
+    pass: "yqhb mkgu fnnm tain",
+  },
+});
 
+const handleSignup = async (req, res) => {
+  const { email, password, userObject } = req.body;
+  if (!email || !password || !userObject.firstName
+    || !userObject.lastName
+    || !userObject.phoneNumber
+    || !userObject.gender
+    || !userObject.track
+    || !userObject.city
+    || !userObject.street
+    || !userObject.dob
+    || !userObject.educationLevel
+    || !userObject.schoolName
+    || !userObject.major
+    || !userObject.graduationYear
+    || !userObject.nationalId
+    || !userObject.signature
+  )
+    return res
+      .status(400)
+      .json({ message: "Please submit all mandatory data." });
+  const accountCreatedSuccessfully = await createAccount(email, password, userObject);
+  if (accountCreatedSuccessfully)
+    return res.status(201).json({
+      message: "Account created Successfully."
+    });
 
+  return res
+    .status(500)
+    .json({ message: "Error creating your account." });
+}
 const handleLogin = async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password)
@@ -40,228 +77,69 @@ const handleLogin = async (req, res) => {
 
 
 
+const handleForgotPassword = async (req, res) => {
+  //forget password flow
+  //frontend will send POST API to /auth/forgetPassword
+  //BE will send email to the person trying to recover password
+  //person will click on link in the mail
+  //FE will send the access token in the url to the backend with the new password
+
+
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ message: "Email is required." });
+
+  try {
+    const accessToken = jwt.sign(
+      {
+        email: email,
+      },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: "1hr" }
+    );
+    const message = `http://localhost:8080/resetPassword/${accessToken}`;
+    const mailOptions = {
+      from: "pepomagdy999@gmail.com",
+      to: email,
+      subject: "Forget password link",
+      text: message,
+    };
+
+    transporter.sendMail(mailOptions, (error) => {
+      if (error) {
+        return res.status(500).json({ error: "Failed to send email to " + email });
+      }
+
+      res.status(200).send("Email sent: " + email);
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to send email to " + email });
+  }
+};
+
+
+const handleUpdatePassword = async (req, res) => {
+  const { accessToken, password } = req.body;
+
+  try {
+    jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET, async (err, decoded) => {
+      if (err) return res.status(403).json({ message: 'Forbidden: Invalid token' });
+      await updatePassword(decoded.email, password)
+    });
+
+    res.status(201).json({
+      message: "Password has been updated successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error updating password",
+    });
+  }
+};
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// const transporter = createTransport({
-//   service: "gmail",
-//   auth: {
-//     user: "pepomagdy999@gmail.com",
-//     pass: "yqhb mkgu fnnm tain",
-//   },
-// });
-
-
-// const axios = require("axios");
-// const FRONTEND_URL = process.env.FRONTEND_URL;
-// const appDataSource = require("../dataSource");
-// const userCredentials = require("../entity/user_credentials");
-
-// const handleLogin = async (req, res) => {
-//   const { email, password } = req.body;
-//   if (!email || !password)
-//     return res
-//       .status(400)
-//       .json({ message: "Email and Password are required." });
-
-//     const userRepository = appDataSource.getRepository(userCredentials);
-//     const user = await userRepository.findOne({
-//       where: { email },
-//     });
-
-//     if (!user)
-//       return res
-//         .status(400)
-//         .json({ message: `Employee Id ${req.params.email} not found` });
-
-//     if (user.password === password) {
-//       const accessToken = jwt.sign(
-//         {
-//           email: user.email,
-//           role: user.role,
-//         },
-//         process.env.ACCESS_TOKEN_SECRET,
-//         { expiresIn: "1hr" }
-//       );
-//       res.status(200).json({
-//         role: user.role,
-//         token: accessToken,
-//         message: "success",
-//         id: user.id
-//       });
-//     } else {
-//       return res.status(401).json({ message: "Password is incorrect." });
-//     }
-//   }
-
-
-// const handleSignup = async (req, res) => {
-//   const { company, occupation, firstName, lastName, email } = req.body;
-//   if (!company || !occupation || !firstName || !lastName || !email)
-//     return res
-//       .status(400)
-//       .json({ message: "Please provide all the required fields." });
-//   if (
-//     firstName.includes(" ") ||
-//     firstName.length > 100 ||
-//     !isOnlyLetters(firstName)
-//   )
-//     return res.status(400).json({ message: "First name is invalid." });
-//   if (
-//     lastName.includes(" ") ||
-//     lastName.length > 100 ||
-//     !isOnlyLetters(lastName)
-//   )
-//     return res.status(400).json({ message: "Last name is invalid." });
-//   if (!validateEmail(email))
-//     return res.status(400).json({ message: "Please enter a valid email." });
-
-//   try {
-//     const response = await axios.get(`${process.env.ACCOUNT_MANAGER_URL}/users/${email}`);
-//     if (response.status === 200)
-//       return res.status(401).json({ message: "Mail already exists." });
-//   } catch (error) {
-//     if (error.response && error.response.status === 400) {
-//       try {
-//         await axios.post(`${process.env.ACCOUNT_MANAGER_URL}/users/signup`, {
-//           company,
-//           occupation,
-//           firstName,
-//           lastName,
-//           email,
-//         });
-
-//         return res.status(201).json({
-//           message: "User info has been saved and sent to another service.",
-//         });
-//       } catch (error) {
-//         console.error(error);
-//         return res.status(500).json({
-//           message: "Error saving user info or sending it to another service.",
-//         });
-//       }
-//     } else {
-//       return res
-//         .status(500)
-//         .json({ error: "Error fetching emails from database" });
-//     }
-//   }
-// };
-
-// const handleUpdatePassword = async (req, res) => {
-//   const { email, password } = req.body;
-//   const validation = validatePassword(password);
-//   if (!validateEmail(email))
-//     return res.status(400).json({ message: "Please enter a valid email." });
-//   if (!validation.valid) {
-//     return res.status(400).json({
-//       message: validation.message,
-//     });
-//   }
-//   try {
-//     await axios.post(`${process.env.ACCOUNT_MANAGER_URL}/users/updatePassword`, {
-//       email,
-//       password,
-//     });
-
-//     res.status(201).json({
-//       message: "Password has been updated successfully",
-//     });
-//   } catch (error) {
-//     if (error.response.status === 404) {
-//       res.status(400).json({
-//         message: "Email not found!",
-//       });
-//     } else {
-//       console.error(error.response.status);
-//       res.status(500).json({
-//         message: "Error updating password",
-//       });
-//     }
-//   }
-// };
-
-
-// const handleForgetPassword = async (req, res) => {
-//   const { email } = req.body;
-//   if (!email) return res.status(400).json({ message: "Email is required." });
-
-//   if (!validateEmail(email))
-//     return res.status(400).json({ message: "Please enter a valid email." });
-
-//   try {
-//     await axios.get(`${process.env.ACCOUNT_MANAGER_URL}/users/${email}`);
-//   } catch (err) {
-//     return res.status(401).json({ message: "Email does not exist." });
-//   }
-
-//   try {
-//     const accessToken = jwt.sign(
-//       {
-//         email: email,
-//       },
-//       process.env.ACCESS_TOKEN_SECRET,
-//       { expiresIn: "1hr" }
-//     );
-//     const message = `http://localhost:3000/resetPassword/${accessToken}`;
-//     console.log(message);
-//     handleForgetPasswordForTestingMessage = message;
-//     const mailOptions = {
-//       from: "pepomagdy999@gmail.com",
-//       to: email,
-//       subject: "Forget password link",
-//       text: message,
-//     };
-
-//     transporter.sendMail(mailOptions, (error, info) => {
-//       if (error) {
-//         return res.status(500).send(error.toString());
-//       }
-
-//       res.status(200).send("Email sent: " + info.response);
-//     });
-//   } catch (error) {
-//     res.status(500).json({ error: "Failed to send email to " + info.response });
-//   }
-// };
-
-// const handleResetPassword = async (req, res) => {
-//   const authHeader = req.headers["authorization"];
-//   if (!authHeader) return res.sendStatus(401);
-//   const token = authHeader.split(" ")[1];
-//   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-//     if (err) return res.sendStatus(403);
-//     req.user = decoded.email;
-
-//     res.status(200).json({ email: decoded.email });
-//   });
-// };
 // function validateEmail(email) {
 //   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 //   return emailRegex.test(email);
@@ -337,4 +215,7 @@ const handleLogin = async (req, res) => {
 
 export {
   handleLogin,
+  handleForgotPassword,
+  handleUpdatePassword,
+  handleSignup
 };

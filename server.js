@@ -5,7 +5,6 @@ import corsOptions from "./config/corsOptions.js";
 import { appDataSource } from "./dataSource.js";
 import jwtValidationMiddleware from "./middleware/jwtValidation.js";
 import authRoutes from "./routes/api/authRoutes.js"
-import userRoutes from "./routes/api/userRoutes.js"
 const PORT = process.env.PORT;
 // app.use(cors(corsOptions));
 
@@ -13,7 +12,6 @@ app.use(urlencoded({ extended: false }));
 app.use(json());
 app.use(jwtValidationMiddleware);
 
-app.use("/users", userRoutes);
 app.use('/auth', authRoutes)
 
 
