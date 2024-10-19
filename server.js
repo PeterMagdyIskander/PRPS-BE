@@ -12,7 +12,7 @@ app.use(urlencoded({ extended: false }));
 app.use(json());
 app.use(jwtValidationMiddleware);
 
-app.use('/auth', authRoutes)
+app.use('/users', authRoutes)
 
 
 const main = async () => {
